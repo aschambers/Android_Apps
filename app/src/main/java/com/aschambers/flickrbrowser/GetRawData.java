@@ -67,16 +67,17 @@ class GetRawData extends AsyncTask<String, Void, String> {
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             // reads one line at a time
-            String line;
+//            String line;
 
             // reason we are putting null first, is so the code is forced to pause and check line for null
-            while(null != (line = reader.readLine())) {
+//            while(null != (line = reader.readLine())) {
+            for(String line = reader.readLine(); line != null; line = reader.readLine()) {
                 // new line characters are stripped off the end of each line so we have to append the new
                 // line characters back in, since we are reading text data, reading one line at a time makes sense
                 result.append(line).append("\n");
             }
 
-            // if no exception throw, we set status to OK and return the string that has been built up
+            // if no exception thrown, we set status to OK and return the string that has been built up
             mDownloadStatus = DownloadStatus.OK;
             return result.toString();
 
@@ -104,7 +105,7 @@ class GetRawData extends AsyncTask<String, Void, String> {
         }
 
         // if we get this far down, there is a problem with the code
-        mDownloadStatus = DownloadStatus.FAILED_OR_EMPTY
+        mDownloadStatus = DownloadStatus.FAILED_OR_EMPTY;
         return null;
     }
 }
