@@ -1,5 +1,6 @@
 package com.aschambers.flickrbrowser;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -21,17 +22,37 @@ class GetRawData extends AsyncTask<String, Void, String> {
 
     // m stands for member variable in mDownloadStatus
     private DownloadStatus mDownloadStatus;
+    // use final to specify its values are not to be changed.
+    private final OnDownloadComplete mCallback;
 
-    public GetRawData() {
+    // the problem was guarenteeing main activity does have an onDownloadComplete method
+    // this is a binding contract, anything that implements our interface guarantees that it will implement the methods we specified
+    // interfaces should start with a capital letter
+    // OnDownloadComplete was previous MainActivity
+    interface OnDownloadComplete {
+        void onDownloadComplete(String data, DownloadStatus status);
+    }
+
+    public GetRawData(OnDownloadComplete callback) {
         // this is supposed to remove ambiguity, but mDownloadStatus has to only refer to field
         // since no parameters passed to this constructor method, this not needed
         this.mDownloadStatus = DownloadStatus.IDLE;
+        // store mCallback, declared it of type MainActivity, so we can pass any MainActivity class object to it
+        mCallback = callback;
     }
 
     @Override
     protected void onPostExecute(String s) {
         Log.d(TAG, "onPostExecute: parameter = " + s);
         // super.onPostExecute(s); -> not needed, doesn't do anything for us
+
+        // call onDownloadComplete method of the callback object and give it data and status result
+        // good to make sure it exists, so test for null for calling the method
+        if(mCallback != null) {
+            mCallback.onDownloadComplete(s, mDownloadStatus);
+        }
+        // when download finishes, it will provide MainActivity with the data and status result
+        Log.d(TAG, "onPostExecute: ends");
     }
 
     @Override

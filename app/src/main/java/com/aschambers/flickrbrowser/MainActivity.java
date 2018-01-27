@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GetRawData.OnDownloadComplete {
     private static final String TAG = "MainActivity";
 
     @Override
@@ -19,7 +19,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // useful for testing if an error, and seeing if your able to get your json data
-        GetRawData getRawData = new GetRawData();
+        // pass the current object, tell getrawdata class to expect argument and call onDownloadComplete after it's finished
+        GetRawData getRawData = new GetRawData(this);
         getRawData.execute("https://api.flickr.com/services/feeds/photos_public.gne?tags=android,nougat,sdk&tagmode=any&format=json&nojsoncallback=1");
 
         Log.d(TAG, "onCreate: ends");
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    // tells Java compiler that the method that follows is overriding a existing method in its superclass or interface
+    // allows compiler to check that the method has the correct name and type of parameters
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
     public void onDownloadComplete(String data, DownloadStatus status) {
         if(status == DownloadStatus.OK) {
             Log.d(TAG, "onDownloadComplete: data is " + data);
