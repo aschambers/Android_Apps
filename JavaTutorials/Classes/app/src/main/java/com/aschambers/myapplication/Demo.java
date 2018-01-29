@@ -14,5 +14,10 @@ public class Demo {
         // it could potentially evade validation rules, etc. set in that class, which would be a problem
         Alan.setHandleName("Alan");
         System.out.println(Alan.getHandleName());
+        System.out.println("Level: " + Alan.getLevel());
+        System.out.println("Lives: " + Alan.getLives());
+        System.out.println(Alan.getWeapon().getName());
+        Alan.getWeapon().setName("Gun");
+        System.out.println(Alan.getWeapon().getName());
     }
 }
