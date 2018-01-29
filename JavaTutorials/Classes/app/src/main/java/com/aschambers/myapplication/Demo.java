@@ -1,5 +1,8 @@
 package com.aschambers.myapplication;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 /**
  * Created by metabou on 1/29/18.
  */
@@ -19,5 +22,14 @@ public class Demo {
         System.out.println(Alan.getWeapon().getName());
         Alan.getWeapon().setName("Gun");
         System.out.println(Alan.getWeapon().getName());
+
+        Loot redPotion = new Loot("Red Potion", LootType.POTION, 7);
+        Alan.pickUpLoot(redPotion);
+
+        ArrayList<Loot> allItems = Alan.getInventory();
+
+        for(Loot item : allItems) {
+            System.out.println(item.getName());
+        }
     }
 }
