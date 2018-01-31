@@ -2,6 +2,7 @@ package com.aschambers.calculator;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,13 +12,17 @@ import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+    private static final String STATE_PENDING_OPERATION = "PendingOperation";
+    private static final String STATE_OPERAND1 = "Operand1";
+
     private EditText result;
     private EditText newNumber;
     private TextView displayOperation;
 
     // variables to hold the operands and type of calculations
     private Double operand1 = null;
-    private Double operand2 = null;
+//    private Double operand2 = null;
     private String pendingOperation = "=";
 
     @Override
@@ -76,8 +81,15 @@ public class MainActivity extends AppCompatActivity {
                 Button b = (Button) view;
                 String op = b.getText().toString();
                 String value = newNumber.getText().toString();
-                if(value.length() != 0) {
-                    performOperation(value, op);
+//                if(value.length() != 0) {
+//                    performOperation(value, op);
+//                }
+                try {
+                    Double doubleValue = Double.valueOf(value);
+                    performOperation(doubleValue, op);
+                } catch (NumberFormatException e) {
+                    // if error, from putting in a decimal number, clear field
+                    newNumber.setText("");
                 }
                 pendingOperation = op;
                 displayOperation.setText(pendingOperation);
@@ -89,9 +101,88 @@ public class MainActivity extends AppCompatActivity {
         buttonMultiply.setOnClickListener(opListener);
         buttonMinus.setOnClickListener(opListener);
         buttonPlus.setOnClickListener(opListener);
+
+        Button buttonNeg = (Button) findViewById(r.id.buttonNeg);
+
+        buttonNeg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String value = newNumber.getText().toString();
+                if(value.length() == 0) {
+                    newNumber.setText("-");
+                } else {
+                    try {
+                        Double doubleValue = Double.valueOf(value);
+                        doubleValue += 1;
+                        newNumber.setText(doubleValue.toString());
+                    } catch (NumberFormatException e) {
+                        // if newNumber is "-", or ".", the field will be cleared
+                        newNumber.setText("");
+                    }
+                }
+            }
+        });
     }
 
-    private void performOperation(String value, String operation) {
-        displayOperation.setText(operation);
+    private void performOperation(Double value, String operation) {
+        if(null == operand1) {
+            operand1 = value;
+        } else {
+//            operand2 = value;
+
+            if(pendingOperation.equals("=")) {
+                pendingOperation = operation;
+            }
+            switch (pendingOperation) {
+                case "=":
+                    operand1 = value;
+                    break;
+                case "/":
+                    if(value == 0) {
+                        operand1 = 0.0;
+                    } else {
+                        operand1 /= value;
+                    }
+                    break;
+                case "*":
+                    operand1 *= value;
+                    break;
+                case "-":
+                    operand1 -= value;
+                    break;
+                case "+":
+                    operand1 += value;
+                    break;
+            }
+        }
+        result.setText(operand1.toString());
+        result.setText("");
+    }
+
+    // save pending operation and operand1 in state when device is rotated
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState: start");
+        outState.putString(STATE_PENDING_OPERATION, pendingOperation);
+        // device will crash otherwise
+        if(operand1 != null) {
+            outState.putDouble(STATE_OPERAND1, operand1);
+        }
+        // saves our state for us
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState: end");
+    }
+
+    // state can also be restored in the onCreate method
+    // better than onCreate since it only runs if the bundle is valid
+    // retrieve values from onSaveInstanceState
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.d(TAG, "onRestoreInstanceState: start");
+        super.onRestoreInstanceState(savedInstanceState);
+        pendingOperation = savedInstanceState.getString(STATE_PENDING_OPERATION);
+        operand1 = savedInstanceState.getDouble(STATE_OPERAND1);
+        displayOperation.setText(pendingOperation);
+        Log.d(TAG, "onRestoreInstanceState: end");
     }
 }
